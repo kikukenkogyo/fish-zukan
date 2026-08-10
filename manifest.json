@@ -1,7 +1,7 @@
 {
-  "name": "さかな図鑑",
-  "short_name": "さかな図鑑",
-  "description": "写真を撮って魚を見比べる図鑑アプリ",
+  "name": "釣果図鑑",
+  "short_name": "釣果図鑑",
+  "description": "釣った魚を撮影してGoogle Lensで特定する釣果記録アプリ",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#f0f8ff",
