@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0077b6">
+<title>さかな図鑑</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --primary:#0077b6;--primary-light:#00b4d8;--primary-dark:#023e8a;
+  --bg:#f0f8ff;--card:#fff;--text:#1a1a2e;--text-sub:#555;
+  --accent:#ff6b35;--safe-bottom:env(safe-area-inset-bottom,0px);
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
+  background:var(--bg);color:var(--text);display:flex;flex-direction:column}
+
+/* ===== Header ===== */
+.header{background:linear-gradient(135deg,var(--primary),var(--primary-light));
+  color:#fff;padding:12px 16px;display:flex;align-items:center;gap:10px;
+  box-shadow:0 2px 8px rgba(0,0,0,.15);position:relative;z-index:10}
+.header h1{font-size:20px;font-weight:700;flex:1}
+.header .logo{font-size:28px}
+
+/* ===== Search ===== */
+.search-bar{padding:10px 16px;background:var(--bg);position:sticky;top:0;z-index:5}
+.search-bar input{width:100%;padding:10px 14px 10px 38px;border:2px solid #dde;
+  border-radius:24px;font-size:15px;background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' fill='%23999'%3E%3Ccircle cx='7.5' cy='7.5' r='6' stroke='%23999' stroke-width='2' fill='none'/%3E%3Cline x1='12' y1='12' x2='16' y2='16' stroke='%23999' stroke-width='2'/%3E%3C/svg%3E") 12px center no-repeat;
+  outline:none;transition:border .2s}
+.search-bar input:focus{border-color:var(--primary)}
+
+/* ===== Tab nav ===== */
+.tabs{display:flex;gap:6px;padding:0 16px 8px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:6px 14px;border-radius:20px;font-size:13px;font-weight:600;
+  background:#e0e7ef;color:var(--text-sub);white-space:nowrap;border:none;cursor:pointer;
+  transition:all .2s}
+.tab.active{background:var(--primary);color:#fff}
+
+/* ===== Main scrollable area ===== */
+.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:0 16px 100px}
+
+/* ===== Fish grid ===== */
+.fish-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding-bottom:16px}
+.fish-card{background:var(--card);border-radius:16px;overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);cursor:pointer;transition:transform .15s;
+  position:relative}
+.fish-card:active{transform:scale(.97)}
+.fish-card .thumb{width:100%;aspect-ratio:4/3;display:flex;align-items:center;
+  justify-content:center;font-size:56px;position:relative;overflow:hidden}
+.fish-card .season-badge{position:absolute;top:6px;right:6px;
+  background:rgba(0,0,0,.5);color:#fff;font-size:10px;padding:2px 8px;border-radius:10px}
+.fish-card .info{padding:10px 12px}
+.fish-card .name-jp{font-size:15px;font-weight:700}
+.fish-card .name-en{font-size:11px;color:var(--text-sub)}
+.fish-card .size{font-size:11px;color:var(--primary);margin-top:2px}
+.empty-msg{text-align:center;color:var(--text-sub);padding:40px 0;font-size:15px}
+
+/* ===== Detail overlay ===== */
+.detail-overlay{position:fixed;inset:0;background:var(--bg);z-index:100;
+  display:none;flex-direction:column;overflow:hidden}
+.detail-overlay.open{display:flex}
+.detail-header{display:flex;align-items:center;gap:10px;padding:12px 16px;
+  background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff}
+.detail-header .back-btn{background:none;border:none;color:#fff;font-size:24px;
+  cursor:pointer;padding:4px 8px}
+.detail-header h2{font-size:18px;font-weight:700;flex:1}
+.detail-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:100px}
+.detail-hero{width:100%;aspect-ratio:16/9;display:flex;align-items:center;
+  justify-content:center;font-size:100px;position:relative}
+.detail-section{padding:16px}
+.detail-section h3{font-size:14px;color:var(--primary);margin-bottom:8px;
+  border-left:3px solid var(--primary);padding-left:8px}
+.detail-section p,.detail-section li{font-size:14px;line-height:1.7;color:var(--text)}
+.detail-section ul{padding-left:20px}
+.detail-meta{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:0 16px 16px}
+.meta-item{background:var(--card);border-radius:12px;padding:12px;text-align:center;
+  box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.meta-item .label{font-size:11px;color:var(--text-sub)}
+.meta-item .value{font-size:16px;font-weight:700;margin-top:4px}
+
+/* ===== Camera overlay ===== */
+.camera-overlay{position:fixed;inset:0;background:#000;z-index:200;
+  display:none;flex-direction:column}
+.camera-overlay.open{display:flex}
+.camera-top{display:flex;justify-content:space-between;align-items:center;
+  padding:12px 16px;color:#fff;background:rgba(0,0,0,.6);z-index:1}
+.camera-top button{background:none;border:none;color:#fff;font-size:16px;
+  cursor:pointer;padding:6px 12px}
+#video-preview{flex:1;object-fit:cover;width:100%}
+#canvas-capture{display:none}
+.camera-controls{display:flex;justify-content:center;align-items:center;
+  padding:20px;padding-bottom:calc(20px + var(--safe-bottom));background:rgba(0,0,0,.6)}
+.shutter-btn{width:72px;height:72px;border-radius:50%;border:4px solid #fff;
+  background:rgba(255,255,255,.3);cursor:pointer;transition:all .15s;position:relative}
+.shutter-btn:active{background:rgba(255,255,255,.6);transform:scale(.9)}
+.shutter-btn::after{content:'';position:absolute;inset:6px;border-radius:50%;background:#fff}
+
+/* ===== Photo result ===== */
+.photo-result{position:fixed;inset:0;background:var(--bg);z-index:210;
+  display:none;flex-direction:column}
+.photo-result.open{display:flex}
+.photo-result-header{display:flex;align-items:center;gap:10px;padding:12px 16px;
+  background:linear-gradient(135deg,var(--accent),#ff8c42);color:#fff}
+.photo-result-header button{background:none;border:none;color:#fff;font-size:24px;cursor:pointer}
+.photo-result-header h2{flex:1;font-size:18px;font-weight:700}
+.photo-result-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;
+  padding-bottom:100px}
+.captured-photo{width:100%;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.15);margin-bottom:16px}
+.compare-title{font-size:15px;font-weight:700;margin-bottom:12px;color:var(--text)}
+.compare-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+.compare-card{background:var(--card);border-radius:12px;overflow:hidden;
+  box-shadow:0 2px 6px rgba(0,0,0,.08);cursor:pointer;transition:transform .15s}
+.compare-card:active{transform:scale(.97)}
+.compare-card .c-thumb{width:100%;aspect-ratio:4/3;display:flex;align-items:center;
+  justify-content:center;font-size:48px}
+.compare-card .c-name{padding:8px;font-size:13px;font-weight:700;text-align:center}
+
+/* ===== Bottom Nav ===== */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;
+  background:#fff;border-top:1px solid #e0e0e0;
+  display:flex;justify-content:space-around;align-items:center;
+  padding:8px 0 calc(8px + var(--safe-bottom));z-index:50;
+  box-shadow:0 -2px 8px rgba(0,0,0,.06)}
+.nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;
+  background:none;border:none;cursor:pointer;color:var(--text-sub);
+  font-size:10px;padding:4px 12px;transition:color .2s}
+.nav-item.active{color:var(--primary)}
+.nav-item .icon{font-size:22px}
+.nav-item.camera-nav{position:relative;margin-top:-20px}
+.nav-item.camera-nav .icon{width:52px;height:52px;border-radius:50%;
+  background:var(--accent);color:#fff;display:flex;align-items:center;
+  justify-content:center;font-size:26px;box-shadow:0 4px 12px rgba(255,107,53,.4)}
+
+/* ===== My Photos page ===== */
+.my-photos-page{display:none;padding-bottom:16px}
+.my-photos-page.visible{display:block}
+.my-photo-item{background:var(--card);border-radius:16px;overflow:hidden;
+  margin-bottom:12px;box-shadow:0 2px 8px rgba(0,0,0,.08)}
+.my-photo-item img{width:100%;aspect-ratio:16/9;object-fit:cover}
+.my-photo-item .ph-info{padding:12px 16px}
+.my-photo-item .ph-date{font-size:12px;color:var(--text-sub)}
+.my-photo-item .ph-actions{display:flex;gap:8px;margin-top:8px}
+.my-photo-item .ph-actions button{padding:6px 14px;border-radius:8px;border:none;
+  font-size:12px;cursor:pointer}
+.ph-delete{background:#fee;color:#e55}
+
+.no-photos{text-align:center;color:var(--text-sub);padding:60px 0}
+.no-photos .big-icon{font-size:60px;margin-bottom:12px}
+.no-photos p{font-size:14px}
+
+/* Animations */
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.fish-card{animation:fadeIn .3s ease both}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <span class="logo">🐟</span>
+  <h1>さかな図鑑</h1>
+</div>
+
+<!-- Search -->
+<div class="search-bar" id="searchBarArea">
+  <input type="text" id="searchInput" placeholder="魚の名前で検索…">
+</div>
+
+<!-- Category tabs -->
+<div class="tabs" id="tabsArea">
+  <button class="tab active" data-cat="all">すべて</button>
+  <button class="tab" data-cat="shore">堤防・磯</button>
+  <button class="tab" data-cat="offshore">船・沖</button>
+  <button class="tab" data-cat="river">川・湖</button>
+  <button class="tab" data-cat="tropical">南方系</button>
+</div>
+
+<!-- Main content -->
+<div class="main" id="mainArea">
+  <!-- Fish grid (catalog page) -->
+  <div class="fish-grid" id="fishGrid"></div>
+  <div class="empty-msg" id="emptyMsg" style="display:none">該当する魚がいません</div>
+
+  <!-- My photos page -->
+  <div class="my-photos-page" id="myPhotosPage">
+    <div id="photosList"></div>
+    <div class="no-photos" id="noPhotos">
+      <div class="big-icon">📷</div>
+      <p>まだ写真がありません<br>カメラで魚を撮ってみましょう</p>
+    </div>
+  </div>
+</div>
+
+<!-- Bottom Nav -->
+<div class="bottom-nav">
+  <button class="nav-item active" id="navCatalog" onclick="showPage('catalog')">
+    <span class="icon">📖</span>図鑑
+  </button>
+  <button class="nav-item camera-nav" id="navCamera" onclick="openCamera()">
+    <span class="icon">📷</span>
+  </button>
+  <button class="nav-item" id="navPhotos" onclick="showPage('photos')">
+    <span class="icon">🖼️</span>写真
+  </button>
+</div>
+
+<!-- Detail overlay -->
+<div class="detail-overlay" id="detailOverlay">
+  <div class="detail-header">
+    <button class="back-btn" onclick="closeDetail()">←</button>
+    <h2 id="detailTitle"></h2>
+  </div>
+  <div class="detail-body" id="detailBody"></div>
+</div>
+
+<!-- Camera overlay -->
+<div class="camera-overlay" id="cameraOverlay">
+  <div class="camera-top">
+    <button onclick="closeCamera()">✕ 閉じる</button>
+    <span>🐟 魚を撮影</span>
+    <button onclick="flipCamera()">🔄</button>
+  </div>
+  <video id="video-preview" autoplay playsinline></video>
+  <canvas id="canvas-capture"></canvas>
+  <div class="camera-controls">
+    <button class="shutter-btn" onclick="takePhoto()"></button>
+  </div>
+</div>
+
+<!-- Photo result overlay -->
+<div class="photo-result" id="photoResult">
+  <div class="photo-result-header">
+    <button onclick="closePhotoResult()">←</button>
+    <h2>撮影結果</h2>
+  </div>
+  <div class="photo-result-body" id="photoResultBody"></div>
+</div>
+
+<script>
+// ==================== Fish Database ====================
+const FISH = [
+  {
+    id:"aji", name:"アジ", nameEn:"Horse Mackerel", emoji:"🐟",
+    cat:"shore", season:"5〜10月", size:"15〜40cm",
+    habitat:"堤防・漁港・沿岸",
+    color:"#4ea8de",
+    features:["体側に「ぜいご」（硬いトゲ状の鱗）がある","背は青緑色、腹は銀白色","口が小さめで、目が大きい"],
+    desc:"日本の釣りで最もポピュラーな魚の一つ。堤防からのサビキ釣りで手軽に釣れる。群れで回遊し、朝夕のマヅメ時が狙い目。",
+    cooking:"刺身・たたき・フライ・南蛮漬け・干物。新鮮なものは刺身が絶品。"
+  },
+  {
+    id:"saba", name:"サバ", nameEn:"Mackerel", emoji:"🐟",
+    cat:"shore", season:"9〜2月", size:"30〜50cm",
+    habitat:"沿岸〜沖合",
+    color:"#1e6091",
+    features:["背中に黒い波状の模様（サバ模様）","体が紡錘形でスマート","マサバは腹に模様なし、ゴマサバは腹に黒点"],
+    desc:"回遊魚で、群れに当たれば大漁になることも。足が早い（傷みやすい）ので釣ったらすぐ締めるのがコツ。",
+    cooking:"味噌煮・塩焼き・しめ鯖・竜田揚げ。脂の乗った秋サバは絶品。"
+  },
+  {
+    id:"iwashi", name:"イワシ", nameEn:"Sardine", emoji:"🐟",
+    cat:"shore", season:"6〜10月", size:"10〜25cm",
+    habitat:"沿岸・漁港",
+    color:"#48bfe3",
+    features:["体に黒い点が一列に並ぶ（マイワシ）","体が小さく細長い","鱗が剥がれやすい"],
+    desc:"サビキ釣りの定番ターゲット。群れが入ると入れ食いになる。鮮度が落ちるのが極めて早いので、クーラーボックスは必須。",
+    cooking:"刺身・天ぷら・つみれ・酢漬け・丸干し。新鮮なものは手開きで刺身に。"
+  },
+  {
+    id:"tai", name:"マダイ", nameEn:"Red Sea Bream", emoji:"🐠",
+    cat:"offshore", season:"3〜6月・10〜12月", size:"30〜80cm",
+    habitat:"岩礁帯・砂地・沿岸〜沖合",
+    color:"#e63946",
+    features:["鮮やかなピンク〜赤色の体","青い小さな斑点が散在","尾びれの後縁が黒い"],
+    desc:"「魚の王様」と呼ばれる。お祝い事に欠かせない魚。春の「桜鯛」、秋の「モミジ鯛」が特に美味。タイラバや一つテンヤで人気。",
+    cooking:"刺身・塩焼き・鯛めし・煮付け・昆布締め。どんな調理法でも美味しい万能魚。"
+  },
+  {
+    id:"suzuki", name:"スズキ（シーバス）", nameEn:"Japanese Sea Bass", emoji:"🐟",
+    cat:"shore", season:"6〜11月", size:"40〜90cm",
+    habitat:"河口・港湾・干潟・沿岸",
+    color:"#6c757d",
+    features:["銀白色で体が細長い","下あごが上あごより前に出る","背びれが2つに分かれる"],
+    desc:"ルアーフィッシングの大人気ターゲット。夜行性で、街灯の明暗部や橋脚周りが好ポイント。出世魚で、セイゴ→フッコ→スズキと名前が変わる。",
+    cooking:"刺身・洗い・ムニエル・塩焼き。夏は「洗い」にすると臭みがなく美味。"
+  },
+  {
+    id:"hirame", name:"ヒラメ", nameEn:"Olive Flounder", emoji:"🐟",
+    cat:"offshore", season:"11〜2月", size:"30〜80cm",
+    habitat:"砂地・岩礁帯の砂底",
+    color:"#8d6e63",
+    features:["「左ヒラメ」 — 目が体の左側にある","体が平たく、口が大きい","背中側が褐色で砂底に擬態する"],
+    desc:"高級魚の代表格。「左ヒラメに右カレイ」で見分ける。口が大きく、小魚を丸呑みにするフィッシュイーター。泳がせ釣りが主流。",
+    cooking:"刺身（えんがわが絶品）・煮付け・唐揚げ。冬の寒ビラメは最高の味わい。"
+  },
+  {
+    id:"karei", name:"カレイ", nameEn:"Flatfish / Flounder", emoji:"🐟",
+    cat:"shore", season:"10〜3月", size:"20〜50cm",
+    habitat:"砂泥底・港内",
+    color:"#a0855b",
+    features:["「右カレイ」 — 目が体の右側にある","ヒラメより口が小さい","おちょぼ口で、虫エサを好む"],
+    desc:"投げ釣りの人気ターゲット。冬場の「寒ガレイ」は脂が乗って美味。仕掛けを投げたら待つ釣りなので、のんびり楽しめる。",
+    cooking:"煮付け・唐揚げ・干物・刺身。煮付けは家庭料理の定番。"
+  },
+  {
+    id:"mebaru", name:"メバル", nameEn:"Rockfish", emoji:"🐟",
+    cat:"shore", season:"12〜5月", size:"15〜30cm",
+    habitat:"岩礁帯・テトラ周り・藻場",
+    color:"#5c4033",
+    features:["目が大きく張り出している","体色は黒・赤・白の3タイプ","鰭に鋭いトゲがある"],
+    desc:"「春告魚（はるつげうお）」の別名を持つ。目が張り出しているのが名前の由来。メバリング（ライトルアー）で人気上昇中。",
+    cooking:"煮付け・唐揚げ・塩焼き・アクアパッツァ。煮付けが最も定番。"
+  },
+  {
+    id:"kasago", name:"カサゴ（ガシラ）", nameEn:"Marbled Rockfish", emoji:"🐟",
+    cat:"shore", season:"通年（冬が旬）", size:"15〜30cm",
+    habitat:"岩礁帯・テトラの穴・堤防際",
+    color:"#c1440e",
+    features:["頭が大きく、体にまだら模様","口が大きく上を向いている","鰭にトゲがあり刺さると痛い"],
+    desc:"穴釣りの定番ターゲット。テトラや岩の隙間に潜んでいる。根魚なので、ゆっくり底を攻めるのがコツ。通年釣れるありがたい魚。",
+    cooking:"唐揚げ・煮付け・味噌汁。丸ごと唐揚げにすると頭からバリバリ食べられる。"
+  },
+  {
+    id:"buri", name:"ブリ", nameEn:"Japanese Amberjack", emoji:"🐟",
+    cat:"offshore", season:"12〜2月", size:"60〜120cm",
+    habitat:"沖合・沿岸",
+    color:"#023047",
+    features:["背が青緑色、腹は銀白色","目から尾にかけて黄色い帯がある","体がずんぐりと太い"],
+    desc:"出世魚の代表。ワカシ→イナダ→ワラサ→ブリ。冬の「寒ブリ」は脂たっぷりで最高。ジギングや泳がせ釣りで狙う。",
+    cooking:"刺身・しゃぶしゃぶ・照り焼き・ブリ大根。寒ブリの刺身は格別。"
+  },
+  {
+    id:"kanpachi", name:"カンパチ", nameEn:"Greater Amberjack", emoji:"🐟",
+    cat:"offshore", season:"7〜10月", size:"50〜150cm",
+    habitat:"沖合の岩礁帯",
+    color:"#1d3557",
+    features:["正面から見ると目の間に「八」の字の模様","ブリより体が丸みを帯びている","ブリより黄色帯が薄い"],
+    desc:"ブリの仲間だが、味はカンパチの方が上という評価も。引きが強烈で、大物釣りの醍醐味を味わえる。名前は「間八」の字模様から。",
+    cooking:"刺身・カルパッチョ・しゃぶしゃぶ。脂がしつこくなく上品な味わい。"
+  },
+  {
+    id:"sawara", name:"サワラ", nameEn:"Japanese Spanish Mackerel", emoji:"🐟",
+    cat:"offshore", season:"10〜3月", size:"50〜100cm",
+    habitat:"沿岸〜沖合",
+    color:"#457b9d",
+    features:["体が細長く「狭い腹」が名前の由来","体側に暗色の斑点が並ぶ","鋭い歯を持つ"],
+    desc:"ショアジギングやサーフからも狙える。歯が鋭いのでリーダーは太めに。漢字では「鰆」で、春の魚だが食べて美味いのは冬。",
+    cooking:"西京焼き・刺身・炙り・天ぷら。西京焼きは定番中の定番。"
+  },
+  {
+    id:"kurodai", name:"クロダイ（チヌ）", nameEn:"Black Sea Bream", emoji:"🐟",
+    cat:"shore", season:"3〜6月・9〜11月", size:"25〜50cm",
+    habitat:"堤防・河口・磯",
+    color:"#2d2d2d",
+    features:["全体的に黒っぽい体色","マダイに似た体型だが色が暗い","若魚は体側に薄い横縞がある"],
+    desc:"フカセ釣り・落とし込みの人気ターゲット。都市部の港湾にもいる身近な魚。雑食性で、コーンやスイカで釣れることも。",
+    cooking:"刺身・塩焼き・煮付け・ムニエル。臭みがある場合は皮を引いて刺身に。"
+  },
+  {
+    id:"kawahagi", name:"カワハギ", nameEn:"Thread-sail Filefish", emoji:"🐟",
+    cat:"shore", season:"9〜1月", size:"15〜30cm",
+    habitat:"岩礁帯・砂底",
+    color:"#a8dadc",
+    features:["菱形の体で、ザラザラした皮","口が小さくおちょぼ口","第一背鰭がツノのように立つ"],
+    desc:"エサ取り名人として有名。アタリを出さずにエサだけ持っていく。肝（キモ）が絶品で、冬は「肝パン」（肝がパンパン）を狙う。",
+    cooking:"肝醤油で刺身・鍋・煮付け。肝和えの刺身はフグに匹敵する美味さ。"
+  },
+  {
+    id:"aori", name:"アオリイカ", nameEn:"Bigfin Reef Squid", emoji:"🦑",
+    cat:"shore", season:"4〜6月・9〜12月", size:"胴長15〜45cm",
+    habitat:"岩礁帯・藻場・堤防周り",
+    color:"#8ecae6",
+    features:["胴体が丸みを帯びたロケット型","ヒレ（エンペラ）が胴全体を覆う","体色を自在に変える"],
+    desc:"エギング（餌木）の大人気ターゲット。イカの王様と呼ばれ、味は甘くて最高級。春は親イカ（大型）、秋は新子（小型多数）が狙い目。",
+    cooking:"刺身・天ぷら・バター焼き・一夜干し。甘みが強く、刺身は絶品。"
+  },
+  {
+    id:"tako", name:"マダコ", nameEn:"Common Octopus", emoji:"🐙",
+    cat:"shore", season:"6〜9月", size:"足を広げて50〜80cm",
+    habitat:"岩礁帯・テトラ・堤防",
+    color:"#c1121f",
+    features:["8本の足に吸盤が2列","体色を変化させて擬態する","頭に見える部分は実は胴体"],
+    desc:"タコ釣り（オクトパッシング）が近年人気急上昇。テンヤやタコエギで堤防から手軽に狙える。意外と力が強く、根に張り付かれると大変。",
+    cooking:"刺身・唐揚げ・煮物・たこ焼き。茹でダコはビールの最高のお供。"
+  },
+  {
+    id:"kisu", name:"キス（シロギス）", nameEn:"Japanese Whiting", emoji:"🐟",
+    cat:"shore", season:"5〜10月", size:"15〜30cm",
+    habitat:"砂浜・砂底",
+    color:"#ffd166",
+    features:["体が細長く、淡い金色〜銀色","口先がとがっている","背びれが2つに分かれる"],
+    desc:"投げ釣り・ちょい投げの王道ターゲット。砂浜からの投げ釣りは夏の風物詩。繊細なアタリを取る面白さがある。",
+    cooking:"天ぷら（最高！）・刺身・フライ・塩焼き。キスの天ぷらは江戸前天ぷらの代表。"
+  },
+  {
+    id:"ayu", name:"アユ", nameEn:"Sweetfish", emoji:"🐟",
+    cat:"river", season:"6〜10月", size:"15〜30cm",
+    habitat:"清流・河川の中流域",
+    color:"#2ec4b6",
+    features:["体が細長く、黄色い斑紋がある","きゅうりのような独特の香り","胸びれの後ろに黄色い斑点"],
+    desc:"「香魚」の別名を持つ川魚の女王。友釣りという独特の釣法で狙う。縄張り意識が強く、侵入者（おとり）に体当たりしてくる習性を利用する。",
+    cooking:"塩焼き（炭火が最高）・甘露煮・背ごし。夏の塩焼きは日本の風物詩。"
+  },
+  {
+    id:"yamame", name:"ヤマメ", nameEn:"Cherry Salmon (Landlocked)", emoji:"🐟",
+    cat:"river", season:"3〜9月", size:"15〜30cm",
+    habitat:"渓流・山間部の清流",
+    color:"#06d6a0",
+    features:["体側に小判型の斑紋（パーマーク）がある","背中にオリーブ色の小さな点","体色は銀白色で美しい"],
+    desc:"「渓流の女王」と呼ばれる美しい魚。警戒心が強く、釣るには技術と忍耐が必要。降海型はサクラマスとなり大型化する。",
+    cooking:"塩焼き・唐揚げ・ムニエル。清流で育った天然ものは格別の味。"
+  },
+  {
+    id:"iwana", name:"イワナ", nameEn:"White-spotted Char", emoji:"🐟",
+    cat:"river", season:"3〜9月", size:"20〜35cm",
+    habitat:"源流域・渓流の最上流部",
+    color:"#264653",
+    features:["体に白い斑点が散在","体色は暗い褐色〜緑褐色","腹部のヒレの前縁が白い"],
+    desc:"渓流魚の中で最も上流に生息する「渓流の王」。警戒心は強いが、好奇心も旺盛。源流域のイワナ釣りは冒険そのもの。",
+    cooking:"塩焼き・骨酒・唐揚げ。囲炉裏で焼いた塩焼きは最高の贅沢。"
+  },
+  {
+    id:"nijimasu", name:"ニジマス", nameEn:"Rainbow Trout", emoji:"🐟",
+    cat:"river", season:"通年（管理釣り場）", size:"20〜60cm",
+    habitat:"渓流・管理釣り場・湖",
+    color:"#e07a5f",
+    features:["体側にピンク〜赤紫色の帯（レインボー）","体全体に黒い小さな斑点","大型は銀色が強くなる"],
+    desc:"管理釣り場（エリアトラウト）で最もポピュラーな魚。北米原産で日本各地に定着。スプーンやクランクで手軽に楽しめる。",
+    cooking:"ムニエル・塩焼き・燻製・フライ。バター焼きが特に美味しい。"
+  },
+  {
+    id:"bass", name:"ブラックバス", nameEn:"Largemouth Bass", emoji:"🐟",
+    cat:"river", season:"4〜10月", size:"20〜60cm",
+    habitat:"湖・池・河川の中下流",
+    color:"#606c38",
+    features:["上あごが目の後方まで大きく裂ける","体色は緑がかった褐色","体側に不規則な暗色帯"],
+    desc:"バスフィッシングのターゲット。ルアー釣りの原点とも言える存在。攻撃的な性格で、様々なルアーに果敢にアタックしてくる。",
+    cooking:"外来種のためキャッチ＆リリースが基本。調理する場合はフライに。"
+  },
+  {
+    id:"ishidai", name:"イシダイ", nameEn:"Striped Beakfish", emoji:"🐟",
+    cat:"shore", season:"4〜11月", size:"30〜60cm",
+    habitat:"磯・岩礁帯",
+    color:"#343a40",
+    features:["若魚は白黒の縞模様（シマダイ）","老成魚は全体が灰色になり口が黒い","くちばし状の強い歯を持つ"],
+    desc:"磯釣りの王者。貝やウニを噛み砕く強力な歯を持ち、仕掛けを壊す「幻の魚」。大物狙いの釣り師が憧れるターゲット。",
+    cooking:"刺身・焼き切り・煮付け。若魚（シマダイ）の方が食味は良いとされる。"
+  },
+  {
+    id:"fugu", name:"クサフグ", nameEn:"Grass Puffer", emoji:"🐡",
+    cat:"shore", season:"通年", size:"10〜20cm",
+    habitat:"堤防・漁港・砂地",
+    color:"#adb5bd",
+    features:["丸い体で、膨らむことができる","背中は緑褐色で小さな棘がある","腹は白く、膨らむとボール状に"],
+    desc:"釣りの外道として最もよく出会うフグ。針のチモトを噛み切ることも。毒があるので絶対に食べないこと！見つけたらリリースを。",
+    cooking:"⚠️ 猛毒あり！素人調理は厳禁。フグ調理免許が必要。"
+  },
+  {
+    id:"kamassu", name:"カマス", nameEn:"Barracuda", emoji:"🐟",
+    cat:"shore", season:"9〜1月", size:"20〜40cm",
+    habitat:"堤防・港内・沿岸",
+    color:"#118ab2",
+    features:["体が細長く、下あごが前に突き出る","鋭い歯を持つ","背が青灰色、腹が銀白色"],
+    desc:"堤防からのルアーや投げサビキで狙える。群れで回遊するため、回ってくれば数釣りが楽しめる。歯が鋭いのでワイヤーリーダー推奨。",
+    cooking:"塩焼き・干物・フライ・刺身。脂の乗った干物は絶品。"
+  },
+  {
+    id:"managatsuo", name:"タチウオ", nameEn:"Largehead Hairtail", emoji:"🐟",
+    cat:"shore", season:"7〜12月", size:"70〜130cm",
+    habitat:"堤防・港湾・沖合",
+    color:"#c0c0c0",
+    features:["体が銀色に輝く刀のような形","鋭い牙を持つ","尾びれがなく、体が先細りになる"],
+    desc:"太刀に似た姿から「太刀魚」。夕マヅメ〜夜にかけてが好時合い。ウキ釣り・テンヤ・ワインドなど様々な釣り方で楽しめる。指何本分で太さを表す。",
+    cooking:"塩焼き・蒲焼き・刺身・天ぷら。塩焼きは皮がパリッと焼けて最高。"
+  },
+  {
+    id:"hata", name:"キジハタ（アコウ）", nameEn:"Red-spotted Grouper", emoji:"🐟",
+    cat:"shore", season:"6〜10月", size:"25〜50cm",
+    habitat:"岩礁帯・ゴロタ場",
+    color:"#d4a373",
+    features:["体にオレンジ色の斑点が散在","口が大きい","全体的に茶褐色〜赤褐色"],
+    desc:"高級根魚の代表格。「夏のフグ」と呼ばれるほど美味。近年はロックフィッシュゲームで人気急上昇。30cm超えると引きも強烈。",
+    cooking:"刺身・煮付け・鍋・アクアパッツァ。薄造りにしてポン酢が最高。"
+  },
+  {
+    id:"maguro", name:"マグロ（キハダ・メジ）", nameEn:"Tuna", emoji:"🐟",
+    cat:"offshore", season:"8〜11月", size:"40〜150cm",
+    habitat:"外洋・沖合",
+    color:"#14213d",
+    features:["紡錘形の流線型ボディ","背が濃紺、腹が銀白色","高速で泳ぐ（時速80km以上）"],
+    desc:"釣り人の究極の夢。キハダマグロやメジマグロは相模湾などでルアーやコマセ釣りで狙える。ヒットしたら強烈なファイトが待っている。",
+    cooking:"刺身・寿司・漬け・ステーキ。言わずと知れた最高の刺身ネタ。"
+  },
+  {
+    id:"gure", name:"メジナ（グレ）", nameEn:"Girella", emoji:"🐟",
+    cat:"shore", season:"11〜3月", size:"25〜45cm",
+    habitat:"磯・岩礁帯",
+    color:"#283618",
+    features:["全体的に青黒い体色","体型は丸みを帯びた楕円形","口が小さい"],
+    desc:"磯のフカセ釣りの大人気ターゲット。寒グレ（冬）は脂が乗って美味。潮目やサラシ（波が砕ける白い泡）を狙うのがコツ。",
+    cooking:"刺身・塩焼き・煮付け・ムニエル。冬の寒グレは臭みがなく美味。"
+  },
+  {
+    id:"sanma", name:"サンマ", nameEn:"Pacific Saury", emoji:"🐟",
+    cat:"offshore", season:"9〜11月", size:"25〜35cm",
+    habitat:"沖合",
+    color:"#219ebc",
+    features:["体が細長く刀のような形","下あごが前に突き出る","背が青色、腹が銀色"],
+    desc:"秋の味覚の代表。近年は不漁が続いているが、釣りでは沖釣りで狙える。群れに当たれば数十匹の大漁も。サビキ仕掛けで狙う。",
+    cooking:"塩焼き（大根おろし＋すだち）・刺身・蒲焼き。七輪で焼くのが最高。"
+  }
+];
+
+// ==================== App State ====================
+let currentPage = 'catalog';
+let currentCat = 'all';
+let searchQuery = '';
+let cameraStream = null;
+let facingMode = 'environment';
+let myPhotos = JSON.parse(localStorage.getItem('fishPhotos') || '[]');
+
+// ==================== Render Functions ====================
+function renderGrid(){
+  const grid = document.getElementById('fishGrid');
+  const emptyMsg = document.getElementById('emptyMsg');
+
+  let filtered = FISH;
+  if(currentCat !== 'all'){
+    filtered = filtered.filter(f => f.cat === currentCat);
+  }
+  if(searchQuery){
+    const q = searchQuery.toLowerCase();
+    filtered = filtered.filter(f =>
+      f.name.toLowerCase().includes(q) ||
+      f.nameEn.toLowerCase().includes(q) ||
+      f.desc.toLowerCase().includes(q) ||
+      f.cooking.toLowerCase().includes(q)
+    );
+  }
+
+  if(filtered.length === 0){
+    grid.innerHTML = '';
+    emptyMsg.style.display = 'block';
+    return;
+  }
+  emptyMsg.style.display = 'none';
+
+  grid.innerHTML = filtered.map((f,i) => `
+    <div class="fish-card" style="animation-delay:${i*0.05}s" onclick="openDetail('${f.id}')">
+      <div class="thumb" style="background:${f.color}20">
+        <span>${f.emoji}</span>
+        <span class="season-badge">${f.season.split('・')[0].split('〜')[0]}〜</span>
+      </div>
+      <div class="info">
+        <div class="name-jp">${f.name}</div>
+        <div class="name-en">${f.nameEn}</div>
+        <div class="size">📏 ${f.size}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openDetail(id){
+  const f = FISH.find(x => x.id === id);
+  if(!f) return;
+  document.getElementById('detailTitle').textContent = f.name;
+  document.getElementById('detailBody').innerHTML = `
+    <div class="detail-hero" style="background:${f.color}15">
+      <span>${f.emoji}</span>
+    </div>
+    <div class="detail-meta">
+      <div class="meta-item"><div class="label">大きさ</div><div class="value">📏 ${f.size}</div></div>
+      <div class="meta-item"><div class="label">旬</div><div class="value">📅 ${f.season}</div></div>
+      <div class="meta-item"><div class="label">場所</div><div class="value">📍 ${f.habitat}</div></div>
+      <div class="meta-item"><div class="label">分類</div><div class="value">${f.nameEn}</div></div>
+    </div>
+    <div class="detail-section">
+      <h3>見分けポイント</h3>
+      <ul>${f.features.map(x => `<li>${x}</li>`).join('')}</ul>
+    </div>
+    <div class="detail-section">
+      <h3>特徴・釣り方</h3>
+      <p>${f.desc}</p>
+    </div>
+    <div class="detail-section">
+      <h3>食べ方</h3>
+      <p>${f.cooking}</p>
+    </div>
+  `;
+  document.getElementById('detailOverlay').classList.add('open');
+}
+
+function closeDetail(){
+  document.getElementById('detailOverlay').classList.remove('open');
+}
+
+// ==================== Page Navigation ====================
+function showPage(page){
+  currentPage = page;
+  document.getElementById('fishGrid').style.display = page==='catalog'?'grid':'none';
+  document.getElementById('emptyMsg').style.display = 'none';
+  document.getElementById('myPhotosPage').classList.toggle('visible', page==='photos');
+  document.getElementById('searchBarArea').style.display = page==='catalog'?'block':'none';
+  document.getElementById('tabsArea').style.display = page==='catalog'?'flex':'none';
+
+  document.getElementById('navCatalog').classList.toggle('active', page==='catalog');
+  document.getElementById('navPhotos').classList.toggle('active', page==='photos');
+
+  if(page==='catalog') renderGrid();
+  if(page==='photos') renderPhotos();
+}
+
+// ==================== Category Tabs ====================
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    currentCat = tab.dataset.cat;
+    renderGrid();
+  });
+});
+
+// ==================== Search ====================
+document.getElementById('searchInput').addEventListener('input', e => {
+  searchQuery = e.target.value.trim();
+  renderGrid();
+});
+
+// ==================== Camera ====================
+async function openCamera(){
+  const overlay = document.getElementById('cameraOverlay');
+  overlay.classList.add('open');
+  try{
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: facingMode, width:{ideal:1280}, height:{ideal:720} },
+      audio: false
+    });
+    document.getElementById('video-preview').srcObject = cameraStream;
+  }catch(e){
+    alert('カメラにアクセスできません。設定を確認してください。');
+    closeCamera();
+  }
+}
+
+function closeCamera(){
+  if(cameraStream){
+    cameraStream.getTracks().forEach(t => t.stop());
+    cameraStream = null;
+  }
+  document.getElementById('cameraOverlay').classList.remove('open');
+}
+
+async function flipCamera(){
+  facingMode = facingMode === 'environment' ? 'user' : 'environment';
+  if(cameraStream){
+    cameraStream.getTracks().forEach(t => t.stop());
+  }
+  try{
+    cameraStream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: facingMode, width:{ideal:1280}, height:{ideal:720} },
+      audio: false
+    });
+    document.getElementById('video-preview').srcObject = cameraStream;
+  }catch(e){
+    alert('カメラの切り替えに失敗しました');
+  }
+}
+
+function takePhoto(){
+  const video = document.getElementById('video-preview');
+  const canvas = document.getElementById('canvas-capture');
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0);
+  const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+  // Save to local storage
+  const photo = {
+    id: Date.now().toString(),
+    dataUrl: dataUrl,
+    date: new Date().toLocaleString('ja-JP'),
+    note: ''
+  };
+  myPhotos.unshift(photo);
+  savePhotos();
+
+  // Close camera and show result
+  closeCamera();
+  showPhotoResult(photo);
+}
+
+function showPhotoResult(photo){
+  const body = document.getElementById('photoResultBody');
+  body.innerHTML = `
+    <img src="${photo.dataUrl}" class="captured-photo" alt="撮影した写真">
+    <div class="compare-title">🔍 この魚かも？ — 図鑑と見比べてみましょう</div>
+    <div class="compare-grid">
+      ${FISH.slice(0,30).map(f => `
+        <div class="compare-card" onclick="closePhotoResult();openDetail('${f.id}')">
+          <div class="c-thumb" style="background:${f.color}15">${f.emoji}</div>
+          <div class="c-name">${f.name}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
+  document.getElementById('photoResult').classList.add('open');
+}
+
+function closePhotoResult(){
+  document.getElementById('photoResult').classList.remove('open');
+}
+
+// ==================== My Photos ====================
+function renderPhotos(){
+  const list = document.getElementById('photosList');
+  const noPhotos = document.getElementById('noPhotos');
+
+  if(myPhotos.length === 0){
+    list.innerHTML = '';
+    noPhotos.style.display = 'block';
+    return;
+  }
+  noPhotos.style.display = 'none';
+
+  list.innerHTML = myPhotos.map(p => `
+    <div class="my-photo-item">
+      <img src="${p.dataUrl}" alt="釣果写真" loading="lazy">
+      <div class="ph-info">
+        <div class="ph-date">📅 ${p.date}</div>
+        <div class="ph-actions">
+          <button class="ph-delete" onclick="deletePhoto('${p.id}')">🗑 削除</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function deletePhoto(id){
+  if(!confirm('この写真を削除しますか？')) return;
+  myPhotos = myPhotos.filter(p => p.id !== id);
+  savePhotos();
+  renderPhotos();
+}
+
+function savePhotos(){
+  try{
+    localStorage.setItem('fishPhotos', JSON.stringify(myPhotos));
+  }catch(e){
+    // Storage full - remove oldest photos
+    while(myPhotos.length > 5){
+      myPhotos.pop();
+    }
+    try{
+      localStorage.setItem('fishPhotos', JSON.stringify(myPhotos));
+    }catch(e2){}
+  }
+}
+
+// ==================== Init ====================
+renderGrid();
+
+// Register service worker
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('sw.js').catch(()=>{});
+}
+</script>
+</body>
+</html>

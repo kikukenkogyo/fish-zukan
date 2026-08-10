@@ -1,0 +1,14 @@
+{
+  "name": "さかな図鑑",
+  "short_name": "さかな図鑑",
+  "description": "写真を撮って魚を見比べる図鑑アプリ",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#f0f8ff",
+  "theme_color": "#0077b6",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
