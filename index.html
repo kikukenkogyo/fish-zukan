@@ -246,9 +246,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
   <div class="identify-body">
     <img id="identifyPhoto" class="identify-photo" alt="撮影した魚">
     <button class="lens-btn" onclick="searchGoogleLens()">
-      🔍 もう一度Google Lensで検索
+      🔍 Google Lensで再検索
     </button>
-    <p class="lens-hint">撮影後にGoogle Lensが自動で開きます。特定できたら下に名前を入力してください。</p>
+    <p class="lens-hint">撮影した画像が端末に保存され、Google Lensが開きます。<br>Lensの🔍から保存した画像を選んで検索してください。<br>戻ってきたら下に魚の名前を入力して保存。</p>
     <div class="identify-form">
       <label>魚の名前</label>
       <input type="text" id="fishNameInput" placeholder="例: アジ、マダイ…" enterkeyhint="next">
@@ -452,33 +452,25 @@ async function reSearchLens(id){
 
 async function doLensSearch(dataUrl){
   try{
+    // 画像を端末に保存
     const res = await fetch(dataUrl);
     const blob = await res.blob();
-    const file = new File([blob], 'fish.jpg', {type:'image/jpeg'});
+    const blobUrl = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = blobUrl;
+    a.download = 'fish_' + Date.now() + '.jpg';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+  }catch(e){}
 
-    // Form POST → Google Lensに直接送信（共有シートなし）
-    const form = document.createElement('form');
-    form.method = 'POST';
-    form.action = 'https://lens.google.com/v3/upload?hl=ja';
-    form.enctype = 'multipart/form-data';
-    form.target = '_blank';
-    form.style.display = 'none';
-
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.name = 'encoded_image';
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    input.files = dt.files;
-
-    form.appendChild(input);
-    document.body.appendChild(form);
-    form.submit();
-    document.body.removeChild(form);
-  }catch(e){
-    // DataTransfer非対応などの場合はGoogle Lensを開く
+  // Google Lensを開く
+  setTimeout(() => {
     window.open('https://lens.google.com/', '_blank');
-  }
+  }, 600);
+
+  showToast('📷 画像を保存しました');
 }
 
 // ==================== Save Catch ====================
