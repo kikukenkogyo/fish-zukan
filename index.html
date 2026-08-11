@@ -29,66 +29,99 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
 .header .logo{font-size:28px}
 .header .catch-count{font-size:13px;opacity:.85;font-weight:500}
 
-/* ===== Main scrollable area ===== */
-.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:12px 16px 100px}
+/* ===== Mode tabs ===== */
+.mode-tabs{display:flex;padding:8px 16px;gap:4px;background:var(--bg);flex-shrink:0}
+.mode-tab{flex:1;padding:8px;border:none;border-radius:10px;font-size:14px;font-weight:600;
+  background:#e0e7ef;color:var(--text-sub);cursor:pointer;transition:all .2s;text-align:center}
+.mode-tab.active{background:var(--primary);color:#fff}
 
-/* ===== Catches grid ===== */
-.catches-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
-.catch-card{background:var(--card);border-radius:16px;overflow:hidden;
-  box-shadow:0 2px 8px rgba(0,0,0,.08);cursor:pointer;transition:transform .15s;
-  position:relative}
-.catch-card:active{transform:scale(.97)}
-.catch-card .catch-thumb{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
-.catch-card .catch-info{padding:10px 12px}
-.catch-card .catch-name{font-size:15px;font-weight:700;white-space:nowrap;
-  overflow:hidden;text-overflow:ellipsis}
-.catch-card .catch-date{font-size:11px;color:var(--text-sub);margin-top:2px}
-.catch-card .catch-note{font-size:11px;color:var(--primary);margin-top:2px;
-  white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* ===== Main ===== */
+.main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 16px 100px}
 
-/* ===== Empty state ===== */
+/* ===== 図鑑 grid ===== */
+.zukan-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;padding-top:8px}
+.sp-card{background:var(--card);border-radius:16px;overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);cursor:pointer;transition:transform .15s}
+.sp-card:active{transform:scale(.97)}
+.sp-card .sp-thumb{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.sp-card .sp-thumb-unknown{width:100%;aspect-ratio:4/3;display:flex;align-items:center;
+  justify-content:center;font-size:48px;background:#e8ecf0}
+.sp-card .sp-info{padding:10px 12px}
+.sp-card .sp-name{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sp-card .sp-stats{font-size:11px;color:var(--text-sub);margin-top:2px}
+.sp-card .sp-best{font-size:11px;color:var(--primary);margin-top:2px}
+
+/* ===== 一覧 list ===== */
+.list-view{padding-top:8px}
+.lc{background:var(--card);border-radius:16px;overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,.08);cursor:pointer;margin-bottom:12px;
+  display:flex;transition:transform .15s}
+.lc:active{transform:scale(.98)}
+.lc .lc-thumb{width:110px;min-height:90px;object-fit:cover;flex-shrink:0}
+.lc .lc-info{padding:10px 12px;flex:1;display:flex;flex-direction:column;justify-content:center;min-width:0}
+.lc .lc-name{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lc .lc-meta{font-size:12px;color:var(--text-sub);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lc .lc-size{font-size:12px;color:var(--primary);margin-top:2px}
+
+/* ===== Empty ===== */
 .empty-state{text-align:center;padding:80px 20px}
 .empty-state .empty-icon{font-size:80px;margin-bottom:16px}
-.empty-state p{font-size:16px;color:var(--text);font-weight:600}
+.empty-state p{font-size:16px;font-weight:600}
 .empty-state .empty-sub{font-size:14px;color:var(--text-sub);margin-top:8px;font-weight:normal}
 
-/* ===== Detail overlay ===== */
-.detail-overlay{position:fixed;inset:0;background:var(--bg);z-index:100;
-  display:none;flex-direction:column;overflow:hidden}
-.detail-overlay.open{display:flex}
-.detail-header{display:flex;align-items:center;gap:10px;padding:12px 16px;
+/* ===== Overlays (common) ===== */
+.ov{position:fixed;inset:0;background:var(--bg);z-index:100;display:none;flex-direction:column;overflow:hidden}
+.ov.open{display:flex}
+.ov-header{display:flex;align-items:center;gap:10px;padding:12px 16px;
   background:linear-gradient(135deg,var(--primary),var(--primary-light));color:#fff}
-.detail-header .back-btn{background:none;border:none;color:#fff;font-size:24px;
-  cursor:pointer;padding:4px 8px}
-.detail-header h2{font-size:18px;font-weight:700;flex:1}
-.detail-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:100px}
+.ov-header button{background:none;border:none;color:#fff;font-size:24px;cursor:pointer;padding:4px 8px}
+.ov-header h2{font-size:18px;font-weight:700;flex:1}
+.ov-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:100px}
+
+/* ===== Species overlay ===== */
+.sp-stats-bar{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px 16px}
+.stat-item{background:var(--card);border-radius:12px;padding:10px;text-align:center;
+  box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.stat-item .st-label{font-size:10px;color:var(--text-sub)}
+.stat-item .st-val{font-size:16px;font-weight:700;margin-top:2px}
+.sp-hint{font-size:13px;color:var(--accent);text-align:center;padding:8px 16px;font-weight:600}
+.sp-catches{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;padding:0 16px}
+.sp-catch-card{background:var(--card);border-radius:12px;overflow:hidden;
+  box-shadow:0 1px 4px rgba(0,0,0,.06);cursor:pointer;transition:transform .15s}
+.sp-catch-card:active{transform:scale(.97)}
+.sp-catch-card img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.sp-catch-card .scc-info{padding:8px 10px;font-size:12px}
+.sp-catch-card .scc-info .scc-size{font-weight:700;color:var(--primary)}
+
+/* ===== Detail overlay ===== */
 .detail-photo{width:100%;max-height:50vh;object-fit:contain;background:#000}
 .detail-info{padding:16px}
-.detail-name{font-size:24px;font-weight:700;margin-bottom:4px}
-.detail-date{font-size:13px;color:var(--text-sub);margin-bottom:16px}
+.detail-name{font-size:22px;font-weight:700;margin-bottom:8px}
+.detail-meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px}
+.dm-item{background:var(--card);border-radius:10px;padding:10px;
+  box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.dm-item .dm-label{font-size:10px;color:var(--text-sub)}
+.dm-item .dm-val{font-size:14px;font-weight:600;margin-top:2px;word-break:break-all}
 .detail-note{font-size:14px;line-height:1.6;padding:12px;background:var(--card);
-  border-radius:12px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
-.detail-actions{display:flex;gap:10px;flex-wrap:wrap}
-.detail-actions button{flex:1;min-width:80px;padding:12px;border:none;border-radius:12px;
-  font-size:14px;font-weight:600;cursor:pointer;transition:transform .1s}
+  border-radius:10px;margin-bottom:16px;box-shadow:0 1px 3px rgba(0,0,0,.05)}
+.detail-actions{display:flex;gap:8px;flex-wrap:wrap}
+.detail-actions button{flex:1;min-width:70px;padding:11px;border:none;border-radius:10px;
+  font-size:13px;font-weight:600;cursor:pointer;transition:transform .1s}
 .detail-actions button:active{transform:scale(.96)}
-.btn-lens{background:var(--google);color:#fff}
+.btn-google{background:var(--google);color:#fff}
 .btn-edit{background:#e8ecf0;color:var(--text)}
 .btn-delete{background:#fee;color:#e55}
 
-/* ===== Camera overlay ===== */
-.camera-overlay{position:fixed;inset:0;background:#000;z-index:200;
-  display:none;flex-direction:column}
+/* ===== Camera ===== */
+.camera-overlay{position:fixed;inset:0;background:#000;z-index:200;display:none;flex-direction:column}
 .camera-overlay.open{display:flex}
 .camera-top{display:flex;justify-content:space-between;align-items:center;
   padding:12px 16px;color:#fff;background:rgba(0,0,0,.6);z-index:1;flex-shrink:0}
-.camera-top button{background:none;border:none;color:#fff;font-size:16px;
-  cursor:pointer;padding:6px 12px}
+.camera-top button{background:none;border:none;color:#fff;font-size:16px;cursor:pointer;padding:6px 12px}
 #video-preview{flex:1;object-fit:cover;width:100%;min-height:0}
 #canvas-capture{display:none}
 .camera-controls{display:flex;justify-content:center;align-items:center;gap:30px;
-  padding:20px;padding-bottom:calc(32px + var(--safe-bottom));background:rgba(0,0,0,.6);
-  flex-shrink:0}
+  padding:20px;padding-bottom:calc(32px + var(--safe-bottom));background:rgba(0,0,0,.6);flex-shrink:0}
 .shutter-btn{width:72px;height:72px;border-radius:50%;border:4px solid #fff;
   background:rgba(255,255,255,.3);cursor:pointer;transition:all .15s;position:relative}
 .shutter-btn:active{background:rgba(255,255,255,.6);transform:scale(.9)}
@@ -98,66 +131,61 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
   display:flex;align-items:center;justify-content:center}
 .gallery-btn-cam:active{background:rgba(255,255,255,.2)}
 
-/* ===== Identify overlay ===== */
-.identify-overlay{position:fixed;inset:0;background:var(--bg);z-index:210;
-  display:none;flex-direction:column}
-.identify-overlay.open{display:flex}
-.identify-header{display:flex;align-items:center;gap:10px;padding:12px 16px;
+/* ===== Save overlay ===== */
+.save-overlay{position:fixed;inset:0;background:var(--bg);z-index:210;display:none;flex-direction:column}
+.save-overlay.open{display:flex}
+.save-header{display:flex;align-items:center;gap:10px;padding:12px 16px;
   background:linear-gradient(135deg,var(--accent),#ff8c42);color:#fff}
-.identify-header button{background:none;border:none;color:#fff;font-size:24px;cursor:pointer}
-.identify-header h2{flex:1;font-size:18px;font-weight:700}
-.identify-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
-  padding:16px;padding-bottom:100px}
-.identify-photo{width:100%;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.15);
-  margin-bottom:16px}
-.identify-form{background:var(--card);border-radius:16px;padding:20px;
-  box-shadow:0 2px 8px rgba(0,0,0,.06)}
-.identify-form label{display:block;font-size:13px;font-weight:600;color:var(--text-sub);
-  margin-bottom:6px;margin-top:14px}
-.identify-form label:first-child{margin-top:0}
-.identify-form input{width:100%;padding:12px 14px;border:2px solid #e0e0e0;
-  border-radius:12px;font-size:16px;outline:none;transition:border .2s;
-  -webkit-appearance:none}
-.identify-form input:focus{border-color:var(--primary)}
+.save-header button{background:none;border:none;color:#fff;font-size:24px;cursor:pointer}
+.save-header h2{flex:1;font-size:18px;font-weight:700}
+.save-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:16px;padding-bottom:100px}
+.save-photo{width:100%;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.15);margin-bottom:16px}
+.save-form{background:var(--card);border-radius:16px;padding:20px;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.save-form label{display:block;font-size:13px;font-weight:600;color:var(--text-sub);margin-bottom:6px;margin-top:14px}
+.save-form label:first-child{margin-top:0}
+.save-form input{width:100%;padding:12px 14px;border:2px solid #e0e0e0;border-radius:12px;
+  font-size:16px;outline:none;transition:border .2s;-webkit-appearance:none}
+.save-form input:focus{border-color:var(--primary)}
+.size-wrap{display:flex;align-items:center;gap:8px}
+.size-wrap input{flex:1}
+.size-wrap .unit{font-size:16px;font-weight:600;color:var(--text-sub)}
+.gps-status{font-size:11px;color:var(--success);margin-top:4px}
 .save-btn{width:100%;padding:14px;background:var(--success);color:#fff;border:none;
   border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;margin-top:20px;
   box-shadow:0 4px 12px rgba(46,204,113,.3);transition:transform .1s}
 .save-btn:active{transform:scale(.98)}
 
-/* ===== Bottom Nav ===== */
-.bottom-nav{position:fixed;bottom:0;left:0;right:0;
-  background:#fff;border-top:1px solid #e0e0e0;
+/* ===== Edit modal ===== */
+.edit-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;
+  display:none;align-items:flex-end;justify-content:center}
+.edit-modal.open{display:flex}
+.edit-sheet{background:#fff;border-radius:20px 20px 0 0;padding:24px;width:100%;
+  max-height:80vh;overflow-y:auto;padding-bottom:calc(24px + var(--safe-bottom))}
+.edit-sheet h3{font-size:18px;font-weight:700;margin-bottom:16px}
+.edit-sheet label{display:block;font-size:13px;font-weight:600;color:var(--text-sub);margin-bottom:6px;margin-top:14px}
+.edit-sheet label:first-of-type{margin-top:0}
+.edit-sheet input{width:100%;padding:12px 14px;border:2px solid #e0e0e0;border-radius:12px;
+  font-size:16px;outline:none;-webkit-appearance:none}
+.edit-sheet input:focus{border-color:var(--primary)}
+.edit-actions{display:flex;gap:10px;margin-top:20px}
+.edit-actions button{flex:1;padding:12px;border:none;border-radius:12px;font-size:14px;
+  font-weight:600;cursor:pointer;transition:transform .1s}
+.edit-actions button:active{transform:scale(.96)}
+.btn-save{background:var(--primary);color:#fff}
+.btn-cancel{background:#e8ecf0;color:var(--text)}
+
+/* ===== Bottom nav ===== */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e0e0e0;
   display:flex;justify-content:space-around;align-items:center;
-  padding:8px 0 calc(8px + var(--safe-bottom));z-index:50;
-  box-shadow:0 -2px 8px rgba(0,0,0,.06)}
+  padding:8px 0 calc(8px + var(--safe-bottom));z-index:50;box-shadow:0 -2px 8px rgba(0,0,0,.06)}
 .nav-item{display:flex;flex-direction:column;align-items:center;gap:2px;
   background:none;border:none;cursor:pointer;color:var(--text-sub);
   font-size:10px;padding:4px 12px;transition:color .2s}
-.nav-item.active{color:var(--primary)}
 .nav-item .icon{font-size:22px}
 .nav-item.camera-nav{position:relative;margin-top:-20px}
 .nav-item.camera-nav .icon{width:52px;height:52px;border-radius:50%;
   background:var(--accent);color:#fff;display:flex;align-items:center;
   justify-content:center;font-size:26px;box-shadow:0 4px 12px rgba(255,107,53,.4)}
-
-/* ===== Edit modal ===== */
-.edit-modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:300;
-  display:none;align-items:center;justify-content:center;padding:20px}
-.edit-modal.open{display:flex}
-.edit-content{background:#fff;border-radius:20px;padding:24px;width:100%;max-width:360px}
-.edit-content h3{font-size:18px;font-weight:700;margin-bottom:16px}
-.edit-content label{display:block;font-size:13px;font-weight:600;color:var(--text-sub);
-  margin-bottom:6px;margin-top:14px}
-.edit-content label:first-of-type{margin-top:0}
-.edit-content input{width:100%;padding:12px 14px;border:2px solid #e0e0e0;
-  border-radius:12px;font-size:16px;outline:none;-webkit-appearance:none}
-.edit-content input:focus{border-color:var(--primary)}
-.edit-actions{display:flex;gap:10px;margin-top:20px}
-.edit-actions button{flex:1;padding:12px;border:none;border-radius:12px;
-  font-size:14px;font-weight:600;cursor:pointer;transition:transform .1s}
-.edit-actions button:active{transform:scale(.96)}
-.edit-save-btn{background:var(--primary);color:#fff}
-.edit-cancel-btn{background:#e8ecf0;color:var(--text)}
 
 /* ===== Toast ===== */
 .toast{position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-100px);
@@ -166,9 +194,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
   box-shadow:0 4px 16px rgba(0,0,0,.25);white-space:nowrap}
 .toast.show{transform:translateX(-50%) translateY(0)}
 
-/* ===== Animations ===== */
 @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-.catch-card{animation:fadeIn .3s ease both}
+.sp-card,.lc{animation:fadeIn .3s ease both}
 </style>
 </head>
 <body>
@@ -180,46 +207,57 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
   <span class="catch-count" id="catchCount"></span>
 </div>
 
-<!-- Main content -->
+<!-- Mode tabs -->
+<div class="mode-tabs" id="modeTabs">
+  <button class="mode-tab active" data-mode="zukan" onclick="setMode('zukan')">📖 図鑑</button>
+  <button class="mode-tab" data-mode="list" onclick="setMode('list')">📋 一覧</button>
+</div>
+
+<!-- Main -->
 <div class="main" id="mainArea">
-  <div class="catches-grid" id="catchesGrid"></div>
+  <div class="zukan-grid" id="zukanGrid"></div>
+  <div class="list-view" id="listView" style="display:none"></div>
   <div class="empty-state" id="emptyState" style="display:none">
     <div class="empty-icon">🎣</div>
     <p>まだ釣果がありません</p>
-    <p class="empty-sub">🔍で魚を調べて、📷で撮影して記録しよう！</p>
+    <p class="empty-sub">📷で魚を撮影して図鑑を作りましょう！</p>
   </div>
 </div>
 
-<!-- Bottom Nav -->
+<!-- Bottom nav -->
 <div class="bottom-nav">
-  <button class="nav-item active" onclick="scrollToTop()">
-    <span class="icon">🐟</span>釣果
-  </button>
-  <button class="nav-item" onclick="openGoogleLens()">
+  <button class="nav-item" onclick="openGoogle()">
     <span class="icon">🔍</span>調べる
   </button>
   <button class="nav-item camera-nav" onclick="openCamera()">
     <span class="icon">📷</span>
   </button>
-  <button class="nav-item" onclick="pickFromGallery()">
+  <button class="nav-item" onclick="pickGallery()">
     <span class="icon">🖼️</span>追加
   </button>
 </div>
-
-<!-- Hidden file input for gallery import -->
 <input type="file" id="galleryInput" accept="image/*" style="display:none">
 
-<!-- Detail overlay -->
-<div class="detail-overlay" id="detailOverlay">
-  <div class="detail-header">
-    <button class="back-btn" onclick="closeDetail()">←</button>
-    <h2 id="detailTitle"></h2>
+<!-- Species overlay -->
+<div class="ov" id="speciesOv">
+  <div class="ov-header">
+    <button onclick="closeSpecies()">←</button>
+    <h2 id="speciesTitle"></h2>
   </div>
-  <div class="detail-body" id="detailBody"></div>
+  <div class="ov-body" id="speciesBody"></div>
 </div>
 
-<!-- Camera overlay -->
-<div class="camera-overlay" id="cameraOverlay">
+<!-- Detail overlay -->
+<div class="ov" id="detailOv">
+  <div class="ov-header">
+    <button onclick="closeDetail()">←</button>
+    <h2 id="detailTitle"></h2>
+  </div>
+  <div class="ov-body" id="detailBody"></div>
+</div>
+
+<!-- Camera -->
+<div class="camera-overlay" id="cameraOv">
   <div class="camera-top">
     <button onclick="closeCamera()">✕ 閉じる</button>
     <span>🐟 魚を撮影</span>
@@ -228,25 +266,37 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
   <video id="video-preview" autoplay playsinline></video>
   <canvas id="canvas-capture"></canvas>
   <div class="camera-controls">
-    <button class="gallery-btn-cam" onclick="closeCamera();pickFromGallery()">🖼</button>
+    <button class="gallery-btn-cam" onclick="closeCamera();pickGallery()">🖼</button>
     <button class="shutter-btn" onclick="takePhoto()"></button>
     <div style="width:44px"></div>
   </div>
 </div>
 
 <!-- Save overlay -->
-<div class="identify-overlay" id="identifyOverlay">
-  <div class="identify-header">
-    <button onclick="closeIdentify()">←</button>
+<div class="save-overlay" id="saveOv">
+  <div class="save-header">
+    <button onclick="closeSave()">←</button>
     <h2>📌 釣果を保存</h2>
   </div>
-  <div class="identify-body">
-    <img id="identifyPhoto" class="identify-photo" alt="撮影した魚">
-    <div class="identify-form">
-      <label>魚の名前</label>
-      <input type="text" id="fishNameInput" placeholder="例: アジ、マダイ…" enterkeyhint="next">
-      <label>メモ（任意）</label>
-      <input type="text" id="fishNoteInput" placeholder="例: 30cm、堤防で釣った" enterkeyhint="done">
+  <div class="save-body">
+    <img id="savePhoto" class="save-photo" alt="撮影した魚">
+    <div class="save-form">
+      <label>📍 場所</label>
+      <input type="text" id="inputLocation" placeholder="GPS取得中…">
+      <div class="gps-status" id="gpsStatus"></div>
+
+      <label>📏 大きさ</label>
+      <div class="size-wrap">
+        <input type="number" id="inputSize" placeholder="0" inputmode="numeric" min="0" max="999">
+        <span class="unit">cm</span>
+      </div>
+
+      <label>🐟 魚の名前（あとで入力OK）</label>
+      <input type="text" id="inputName" placeholder="わからなければ空欄でOK">
+
+      <label>📝 メモ（任意）</label>
+      <input type="text" id="inputNote" placeholder="エサ、仕掛け、天気など">
+
       <button class="save-btn" onclick="saveCatch()">📌 釣果を保存</button>
     </div>
   </div>
@@ -254,293 +304,443 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
 
 <!-- Edit modal -->
 <div class="edit-modal" id="editModal">
-  <div class="edit-content">
+  <div class="edit-sheet">
     <h3>✏️ 釣果を編集</h3>
-    <label>魚の名前</label>
-    <input type="text" id="editNameInput">
-    <label>メモ</label>
-    <input type="text" id="editNoteInput">
+    <label>🐟 魚の名前</label>
+    <input type="text" id="editName">
+    <label>📍 場所</label>
+    <input type="text" id="editLocation">
+    <label>📏 大きさ</label>
+    <div class="size-wrap">
+      <input type="number" id="editSize" inputmode="numeric" min="0" max="999">
+      <span class="unit">cm</span>
+    </div>
+    <label>📝 メモ</label>
+    <input type="text" id="editNote">
     <div class="edit-actions">
-      <button class="edit-cancel-btn" onclick="closeEditModal()">キャンセル</button>
-      <button class="edit-save-btn" onclick="saveEdit()">保存</button>
+      <button class="btn-cancel" onclick="closeEdit()">キャンセル</button>
+      <button class="btn-save" onclick="saveEdit()">保存</button>
     </div>
   </div>
 </div>
 
-<!-- Toast notification -->
+<!-- Toast -->
 <div class="toast" id="toast"></div>
 
 <script>
 // ==================== State ====================
 let myCatches = JSON.parse(localStorage.getItem('myCatches') || '[]');
+let currentMode = 'zukan';
 let currentPhotoDataUrl = null;
 let currentEditId = null;
 let cameraStream = null;
 let facingMode = 'environment';
+let pendingGps = null;
 
-// ==================== Render Catches ====================
-function renderCatches(){
-  const grid = document.getElementById('catchesGrid');
-  const empty = document.getElementById('emptyState');
-  const count = document.getElementById('catchCount');
+// ==================== Mode switch ====================
+function setMode(mode){
+  currentMode = mode;
+  document.querySelectorAll('.mode-tab').forEach(t => t.classList.toggle('active', t.dataset.mode === mode));
+  render();
+}
 
-  count.textContent = myCatches.length > 0 ? myCatches.length + '匹' : '';
+// ==================== Render ====================
+function render(){
+  const zukanEl = document.getElementById('zukanGrid');
+  const listEl = document.getElementById('listView');
+  const emptyEl = document.getElementById('emptyState');
+  const countEl = document.getElementById('catchCount');
 
-  if(myCatches.length === 0){
-    grid.innerHTML = '';
-    empty.style.display = 'block';
+  const total = myCatches.length;
+  countEl.textContent = total > 0 ? total + '匹' : '';
+
+  if(total === 0){
+    zukanEl.style.display = 'none';
+    listEl.style.display = 'none';
+    emptyEl.style.display = 'block';
     return;
   }
-  empty.style.display = 'none';
+  emptyEl.style.display = 'none';
 
-  grid.innerHTML = myCatches.map((c, i) => `
-    <div class="catch-card" style="animation-delay:${i * 0.04}s" onclick="openDetail('${c.id}')">
-      <img class="catch-thumb" src="${c.dataUrl}" alt="${c.name}" loading="lazy">
-      <div class="catch-info">
-        <div class="catch-name">${c.name || '不明な魚'}</div>
-        <div class="catch-date">📅 ${c.date}</div>
-        ${c.note ? `<div class="catch-note">📝 ${c.note}</div>` : ''}
+  if(currentMode === 'zukan'){
+    zukanEl.style.display = 'grid';
+    listEl.style.display = 'none';
+    renderZukan();
+  }else{
+    zukanEl.style.display = 'none';
+    listEl.style.display = 'block';
+    renderList();
+  }
+}
+
+// ===== 図鑑 mode =====
+function getSpeciesGroups(){
+  const g = {};
+  myCatches.forEach(c => {
+    const k = (c.name && c.name !== '不明な魚') ? c.name : '？未特定';
+    if(!g[k]) g[k] = [];
+    g[k].push(c);
+  });
+  const out = [];
+  const unk = g['？未特定'] || [];
+  delete g['？未特定'];
+  // Named species sorted by count desc
+  Object.keys(g).sort((a,b) => g[b].length - g[a].length).forEach(k => out.push({name:k, catches:g[k]}));
+  if(unk.length) out.push({name:'？未特定', catches:unk});
+  return out;
+}
+
+function renderZukan(){
+  const groups = getSpeciesGroups();
+  document.getElementById('zukanGrid').innerHTML = groups.map((sp, i) => {
+    const isUnk = sp.name === '？未特定';
+    const sizes = sp.catches.map(c => c.sizeCm || 0).filter(s => s > 0);
+    const maxSize = sizes.length ? Math.max(...sizes) : 0;
+    const thumb = sp.catches[0];
+    return `
+      <div class="sp-card" style="animation-delay:${i*0.04}s" onclick="openSpecies('${encodeURIComponent(sp.name)}')">
+        ${isUnk
+          ? `<div class="sp-thumb-unknown">❓</div>`
+          : `<img class="sp-thumb" src="${thumb.dataUrl}" alt="${sp.name}" loading="lazy">`
+        }
+        <div class="sp-info">
+          <div class="sp-name">${sp.name}</div>
+          <div class="sp-stats">${sp.catches.length}匹釣った</div>
+          ${maxSize ? `<div class="sp-best">📏 最大 ${maxSize}cm</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+// ===== 一覧 mode =====
+function renderList(){
+  document.getElementById('listView').innerHTML = myCatches.map((c, i) => `
+    <div class="lc" style="animation-delay:${i*0.03}s" onclick="openDetail('${c.id}')">
+      <img class="lc-thumb" src="${c.dataUrl}" alt="${c.name || '未特定'}" loading="lazy">
+      <div class="lc-info">
+        <div class="lc-name">${c.name || '？未特定'}</div>
+        <div class="lc-meta">📅 ${c.date}${c.location ? '  📍' + c.location : ''}</div>
+        ${c.sizeCm ? `<div class="lc-size">📏 ${c.sizeCm}cm</div>` : ''}
       </div>
     </div>
   `).join('');
 }
 
-// ==================== Detail ====================
+// ==================== Species overlay ====================
+function openSpecies(encodedName){
+  const name = decodeURIComponent(encodedName);
+  const isUnk = name === '？未特定';
+  const catches = myCatches.filter(c => {
+    if(isUnk) return !c.name || c.name === '不明な魚';
+    return c.name === name;
+  });
+  if(!catches.length) return;
+
+  document.getElementById('speciesTitle').textContent = name + '（' + catches.length + '匹）';
+
+  const sizes = catches.map(c => c.sizeCm || 0).filter(s => s > 0);
+  const maxSize = sizes.length ? Math.max(...sizes) : null;
+  const avgSize = sizes.length ? Math.round(sizes.reduce((a,b)=>a+b,0)/sizes.length) : null;
+  const locations = [...new Set(catches.map(c => c.location).filter(Boolean))];
+
+  let html = '';
+
+  // Stats
+  html += '<div class="sp-stats-bar">';
+  html += `<div class="stat-item"><div class="st-label">合計</div><div class="st-val">${catches.length}匹</div></div>`;
+  html += `<div class="stat-item"><div class="st-label">最大</div><div class="st-val">${maxSize ? maxSize+'cm' : '−'}</div></div>`;
+  html += `<div class="stat-item"><div class="st-label">平均</div><div class="st-val">${avgSize ? avgSize+'cm' : '−'}</div></div>`;
+  html += '</div>';
+
+  if(isUnk) html += '<p class="sp-hint">🔍「調べる」で魚の名前を特定して編集しましょう！</p>';
+
+  // Catches grid
+  html += '<div class="sp-catches">';
+  html += catches.map(c => `
+    <div class="sp-catch-card" onclick="openDetail('${c.id}')">
+      <img src="${c.dataUrl}" alt="" loading="lazy" style="width:100%;aspect-ratio:4/3;object-fit:cover;display:block">
+      <div class="scc-info">
+        ${c.sizeCm ? `<span class="scc-size">${c.sizeCm}cm</span> ` : ''}
+        <span>📅${c.date}</span>
+        ${c.location ? `<br>📍${c.location}` : ''}
+      </div>
+    </div>
+  `).join('');
+  html += '</div>';
+
+  document.getElementById('speciesBody').innerHTML = html;
+  document.getElementById('speciesOv').classList.add('open');
+}
+
+function closeSpecies(){
+  document.getElementById('speciesOv').classList.remove('open');
+}
+
+// ==================== Detail overlay ====================
 function openDetail(id){
   const c = myCatches.find(x => x.id === id);
   if(!c) return;
-  document.getElementById('detailTitle').textContent = c.name || '不明な魚';
+  document.getElementById('detailTitle').textContent = c.name || '？未特定';
   document.getElementById('detailBody').innerHTML = `
     <img class="detail-photo" src="${c.dataUrl}" alt="${c.name}">
     <div class="detail-info">
-      <div class="detail-name">${c.name || '不明な魚'}</div>
-      <div class="detail-date">📅 ${c.date}</div>
+      <div class="detail-name">${c.name || '？未特定'}</div>
+      <div class="detail-meta-grid">
+        <div class="dm-item"><div class="dm-label">日付</div><div class="dm-val">📅 ${c.date}</div></div>
+        <div class="dm-item"><div class="dm-label">大きさ</div><div class="dm-val">📏 ${c.sizeCm ? c.sizeCm+'cm' : '未入力'}</div></div>
+        <div class="dm-item" style="grid-column:span 2"><div class="dm-label">場所</div><div class="dm-val">📍 ${c.location || '未入力'}</div></div>
+      </div>
       ${c.note ? `<div class="detail-note">📝 ${c.note}</div>` : ''}
       <div class="detail-actions">
-        <button class="btn-lens" onclick="openGoogleLens()">🔍 調べる</button>
-        <button class="btn-edit" onclick="openEditModal('${c.id}')">✏️ 編集</button>
+        <button class="btn-google" onclick="openGoogle()">🔍 調べる</button>
+        <button class="btn-edit" onclick="openEdit('${c.id}')">✏️ 編集</button>
         <button class="btn-delete" onclick="deleteCatch('${c.id}')">🗑 削除</button>
       </div>
     </div>
   `;
-  document.getElementById('detailOverlay').classList.add('open');
+  document.getElementById('detailOv').classList.add('open');
 }
 
 function closeDetail(){
-  document.getElementById('detailOverlay').classList.remove('open');
+  document.getElementById('detailOv').classList.remove('open');
 }
 
 // ==================== Camera ====================
 async function openCamera(){
-  document.getElementById('cameraOverlay').classList.add('open');
+  pendingGps = getLocation();
+  document.getElementById('cameraOv').classList.add('open');
   try{
     cameraStream = await navigator.mediaDevices.getUserMedia({
       video:{facingMode, width:{ideal:1280}, height:{ideal:720}}, audio:false
     });
     document.getElementById('video-preview').srcObject = cameraStream;
   }catch(e){
-    alert('カメラにアクセスできません。設定を確認してください。');
+    alert('カメラにアクセスできません');
     closeCamera();
   }
 }
 
 function closeCamera(){
-  if(cameraStream){
-    cameraStream.getTracks().forEach(t => t.stop());
-    cameraStream = null;
-  }
-  document.getElementById('cameraOverlay').classList.remove('open');
+  if(cameraStream){ cameraStream.getTracks().forEach(t=>t.stop()); cameraStream=null; }
+  document.getElementById('cameraOv').classList.remove('open');
 }
 
 async function flipCamera(){
-  facingMode = facingMode === 'environment' ? 'user' : 'environment';
-  if(cameraStream) cameraStream.getTracks().forEach(t => t.stop());
+  facingMode = facingMode==='environment'?'user':'environment';
+  if(cameraStream) cameraStream.getTracks().forEach(t=>t.stop());
   try{
     cameraStream = await navigator.mediaDevices.getUserMedia({
       video:{facingMode, width:{ideal:1280}, height:{ideal:720}}, audio:false
     });
     document.getElementById('video-preview').srcObject = cameraStream;
-  }catch(e){
-    alert('カメラの切り替えに失敗しました');
-  }
+  }catch(e){ alert('カメラの切り替えに失敗しました'); }
 }
 
 function takePhoto(){
-  const video = document.getElementById('video-preview');
-  const canvas = document.getElementById('canvas-capture');
-  canvas.width = video.videoWidth;
-  canvas.height = video.videoHeight;
-  canvas.getContext('2d').drawImage(video, 0, 0);
-  const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+  const v = document.getElementById('video-preview');
+  const c = document.getElementById('canvas-capture');
+  c.width = v.videoWidth; c.height = v.videoHeight;
+  c.getContext('2d').drawImage(v,0,0);
+  const dataUrl = c.toDataURL('image/jpeg',0.85);
   closeCamera();
-  resizeImage(dataUrl).then(resized => openIdentify(resized));
+  resizeImage(dataUrl).then(r => openSave(r));
 }
 
 // ==================== Gallery ====================
-function pickFromGallery(){
+function pickGallery(){
   document.getElementById('galleryInput').click();
 }
-
 document.getElementById('galleryInput').addEventListener('change', e => {
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    resizeImage(ev.target.result).then(resized => openIdentify(resized));
-  };
-  reader.readAsDataURL(file);
+  const f = e.target.files[0]; if(!f) return;
+  if(!pendingGps) pendingGps = getLocation();
+  const r = new FileReader();
+  r.onload = ev => resizeImage(ev.target.result).then(d => openSave(d));
+  r.readAsDataURL(f);
   e.target.value = '';
 });
 
-// ==================== Resize (save storage) ====================
-function resizeImage(dataUrl, maxDim){
-  maxDim = maxDim || 1200;
-  return new Promise(resolve => {
+// ==================== Resize ====================
+function resizeImage(dataUrl, max){
+  max = max||1200;
+  return new Promise(res => {
     const img = new Image();
     img.onload = () => {
-      let w = img.width, h = img.height;
-      if(w <= maxDim && h <= maxDim){ resolve(dataUrl); return; }
-      if(w > h){ h = Math.round(h * maxDim / w); w = maxDim; }
-      else{ w = Math.round(w * maxDim / h); h = maxDim; }
-      const c = document.createElement('canvas');
-      c.width = w; c.height = h;
-      c.getContext('2d').drawImage(img, 0, 0, w, h);
-      resolve(c.toDataURL('image/jpeg', 0.82));
+      let w=img.width, h=img.height;
+      if(w<=max&&h<=max){ res(dataUrl); return; }
+      if(w>h){h=Math.round(h*max/w);w=max;}else{w=Math.round(w*max/h);h=max;}
+      const c=document.createElement('canvas'); c.width=w; c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      res(c.toDataURL('image/jpeg',0.82));
     };
     img.src = dataUrl;
   });
 }
 
-// ==================== Identify ====================
-function openIdentify(dataUrl){
-  currentPhotoDataUrl = dataUrl;
-  document.getElementById('identifyPhoto').src = dataUrl;
-  document.getElementById('fishNameInput').value = '';
-  document.getElementById('fishNoteInput').value = '';
-  document.getElementById('identifyOverlay').classList.add('open');
+// ==================== GPS ====================
+async function getLocation(){
+  return new Promise(res => {
+    if(!navigator.geolocation){ res({location:'',lat:null,lng:null}); return; }
+    navigator.geolocation.getCurrentPosition(
+      async pos => {
+        const lat=pos.coords.latitude, lng=pos.coords.longitude;
+        let location='';
+        try{
+          const r = await fetch(
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=14&accept-language=ja`,
+            {headers:{'User-Agent':'FishZukan/1.0'}}
+          );
+          const d = await r.json();
+          const a = d.address||{};
+          location = a.city||a.town||a.village||a.suburb||a.county||'';
+        }catch(e){}
+        res({location, lat, lng});
+      },
+      () => res({location:'',lat:null,lng:null}),
+      {timeout:8000, maximumAge:60000}
+    );
+  });
 }
 
-function closeIdentify(){
-  document.getElementById('identifyOverlay').classList.remove('open');
+// ==================== Save overlay ====================
+async function openSave(dataUrl){
+  currentPhotoDataUrl = dataUrl;
+  document.getElementById('savePhoto').src = dataUrl;
+  document.getElementById('inputLocation').value = '';
+  document.getElementById('inputSize').value = '';
+  document.getElementById('inputName').value = '';
+  document.getElementById('inputNote').value = '';
+  document.getElementById('gpsStatus').textContent = '📡 GPS取得中…';
+  document.getElementById('saveOv').classList.add('open');
+
+  // Fill GPS
+  if(!pendingGps) pendingGps = getLocation();
+  const loc = await pendingGps;
+  pendingGps = null;
+  if(loc.location){
+    document.getElementById('inputLocation').value = loc.location;
+    document.getElementById('gpsStatus').textContent = '✅ GPS取得完了（編集できます）';
+  }else{
+    document.getElementById('gpsStatus').textContent = '📍 GPS取得できませんでした。手入力してください';
+  }
+  document.getElementById('saveOv').dataset.lat = loc.lat||'';
+  document.getElementById('saveOv').dataset.lng = loc.lng||'';
+}
+
+function closeSave(){
+  document.getElementById('saveOv').classList.remove('open');
   currentPhotoDataUrl = null;
 }
 
-// ==================== Google Lens ====================
-// メイン: Google Lensを直接開く（Lensのカメラで魚を撮影して特定）
-function openGoogleLens(){
-  window.open('https://www.google.com/', '_blank');
-}
-
-
-// ==================== Save Catch ====================
 function saveCatch(){
   if(!currentPhotoDataUrl) return;
+  const name = document.getElementById('inputName').value.trim();
+  const location = document.getElementById('inputLocation').value.trim();
+  const sizeCm = parseInt(document.getElementById('inputSize').value)||0;
+  const note = document.getElementById('inputNote').value.trim();
+  const el = document.getElementById('saveOv');
+  const lat = parseFloat(el.dataset.lat)||null;
+  const lng = parseFloat(el.dataset.lng)||null;
 
-  const name = document.getElementById('fishNameInput').value.trim() || '不明な魚';
-  const note = document.getElementById('fishNoteInput').value.trim();
-
-  myCatches.unshift({
+  const entry = {
     id: Date.now().toString(),
     dataUrl: currentPhotoDataUrl,
-    name: name,
-    note: note,
-    date: new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'})
-  });
-
-  saveCatchesToStorage();
+    name: name||'',
+    sizeCm: sizeCm,
+    location: location,
+    lat: lat, lng: lng,
+    date: new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'}),
+    note: note
+  };
+  myCatches.unshift(entry);
+  saveStorage();
   saveToDevice(currentPhotoDataUrl, name);
-  closeIdentify();
-  renderCatches();
+  closeSave();
+  render();
   showToast('🐟 釣果を保存しました！');
 }
 
-// 端末のライブラリに画像を保存
-async function saveToDevice(dataUrl, name){
-  try{
-    const res = await fetch(dataUrl);
-    const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = (name || 'fish') + '_' + new Date().toISOString().slice(0,10) + '.jpg';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(url), 1000);
-  }catch(e){}
-}
-
 // ==================== Edit ====================
-function openEditModal(id){
-  const c = myCatches.find(x => x.id === id);
-  if(!c) return;
+function openEdit(id){
+  const c = myCatches.find(x=>x.id===id); if(!c) return;
   currentEditId = id;
-  document.getElementById('editNameInput').value = c.name || '';
-  document.getElementById('editNoteInput').value = c.note || '';
+  document.getElementById('editName').value = c.name||'';
+  document.getElementById('editLocation').value = c.location||'';
+  document.getElementById('editSize').value = c.sizeCm||'';
+  document.getElementById('editNote').value = c.note||'';
   document.getElementById('editModal').classList.add('open');
 }
 
-function closeEditModal(){
+function closeEdit(){
   document.getElementById('editModal').classList.remove('open');
   currentEditId = null;
 }
 
 function saveEdit(){
   if(!currentEditId) return;
-  const c = myCatches.find(x => x.id === currentEditId);
-  if(!c) return;
-  c.name = document.getElementById('editNameInput').value.trim() || '不明な魚';
-  c.note = document.getElementById('editNoteInput').value.trim();
-  saveCatchesToStorage();
-  closeEditModal();
+  const c = myCatches.find(x=>x.id===currentEditId); if(!c) return;
+  c.name = document.getElementById('editName').value.trim();
+  c.location = document.getElementById('editLocation').value.trim();
+  c.sizeCm = parseInt(document.getElementById('editSize').value)||0;
+  c.note = document.getElementById('editNote').value.trim();
+  saveStorage();
+  closeEdit();
   closeDetail();
-  renderCatches();
+  closeSpecies();
+  render();
   showToast('✏️ 更新しました');
 }
 
 // ==================== Delete ====================
 function deleteCatch(id){
   if(!confirm('この釣果を削除しますか？')) return;
-  myCatches = myCatches.filter(c => c.id !== id);
-  saveCatchesToStorage();
+  myCatches = myCatches.filter(c=>c.id!==id);
+  saveStorage();
   closeDetail();
-  renderCatches();
+  closeSpecies();
+  render();
   showToast('🗑 削除しました');
 }
 
 // ==================== Storage ====================
-function saveCatchesToStorage(){
-  try{
-    localStorage.setItem('myCatches', JSON.stringify(myCatches));
-  }catch(e){
-    while(myCatches.length > 10){ myCatches.pop(); }
-    try{
-      localStorage.setItem('myCatches', JSON.stringify(myCatches));
-    }catch(e2){
+function saveStorage(){
+  try{ localStorage.setItem('myCatches',JSON.stringify(myCatches)); }
+  catch(e){
+    while(myCatches.length>10) myCatches.pop();
+    try{ localStorage.setItem('myCatches',JSON.stringify(myCatches)); }catch(e2){
       alert('保存容量がいっぱいです。古い釣果を削除してください。');
     }
   }
 }
 
-// ==================== Toast ====================
-function showToast(msg){
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+// ==================== Save to device ====================
+async function saveToDevice(dataUrl, name){
+  try{
+    const r = await fetch(dataUrl);
+    const b = await r.blob();
+    const u = URL.createObjectURL(b);
+    const a = document.createElement('a');
+    a.href = u;
+    a.download = (name||'fish')+'_'+new Date().toISOString().slice(0,10)+'.jpg';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(()=>URL.revokeObjectURL(u),1000);
+  }catch(e){}
 }
 
-// ==================== Misc ====================
-function scrollToTop(){
-  document.getElementById('mainArea').scrollTo({top:0, behavior:'smooth'});
+// ==================== Google ====================
+function openGoogle(){
+  window.open('https://www.google.com/','_blank');
+}
+
+// ==================== Toast ====================
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg; t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2500);
 }
 
 // ==================== Init ====================
-renderCatches();
-
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('sw.js').catch(()=>{});
-}
+render();
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
 </script>
 </body>
 </html>
