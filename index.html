@@ -115,7 +115,10 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
   display:flex;align-items:center;justify-content:center;gap:8px;
   box-shadow:0 4px 12px rgba(66,133,244,.3);transition:transform .1s}
 .lens-btn:active{transform:scale(.98)}
-.lens-hint{font-size:12px;color:var(--text-sub);text-align:center;margin-bottom:20px}
+.lens-hint{font-size:12px;color:var(--text-sub);text-align:center;margin-bottom:10px}
+.share-lens-btn{width:100%;padding:10px;background:none;color:var(--text-sub);border:1.5px solid #ccc;
+  border-radius:12px;font-size:13px;cursor:pointer;margin-bottom:20px;transition:transform .1s}
+.share-lens-btn:active{transform:scale(.98);background:#f5f5f5}
 .identify-form{background:var(--card);border-radius:16px;padding:20px;
   box-shadow:0 2px 8px rgba(0,0,0,.06)}
 .identify-form label{display:block;font-size:13px;font-weight:600;color:var(--text-sub);
@@ -245,10 +248,13 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
   </div>
   <div class="identify-body">
     <img id="identifyPhoto" class="identify-photo" alt="撮影した魚">
-    <button class="lens-btn" onclick="searchGoogleLens()">
-      🔍 Google Lensで検索
+    <button class="lens-btn" onclick="openGoogleLens()">
+      🔍 Google Lensで魚を特定
     </button>
-    <p class="lens-hint">メニューから「Google レンズ」を選ぶと魚を特定できます。<br>特定できたら戻って、下に名前を入力して保存。</p>
+    <p class="lens-hint">Lensが開いたらカメラで魚を撮って特定できます。<br>特定できたら戻って、下に名前を入力して保存。</p>
+    <button class="share-lens-btn" onclick="shareToLens()">
+      📤 魚がもういない場合：この写真をLensに送る
+    </button>
     <div class="identify-form">
       <label>魚の名前</label>
       <input type="text" id="fishNameInput" placeholder="例: アジ、マダイ…" enterkeyhint="next">
@@ -380,10 +386,7 @@ function takePhoto(){
   canvas.getContext('2d').drawImage(video, 0, 0);
   const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
   closeCamera();
-  resizeImage(dataUrl).then(resized => {
-    openIdentify(resized);
-    doLensSearch(resized);
-  });
+  resizeImage(dataUrl).then(resized => openIdentify(resized));
 }
 
 // ==================== Gallery ====================
@@ -396,10 +399,7 @@ document.getElementById('galleryInput').addEventListener('change', e => {
   if(!file) return;
   const reader = new FileReader();
   reader.onload = ev => {
-    resizeImage(ev.target.result).then(resized => {
-      openIdentify(resized);
-      doLensSearch(resized);
-    });
+    resizeImage(ev.target.result).then(resized => openIdentify(resized));
   };
   reader.readAsDataURL(file);
   e.target.value = '';
@@ -439,37 +439,35 @@ function closeIdentify(){
 }
 
 // ==================== Google Lens ====================
-async function searchGoogleLens(){
-  if(!currentPhotoDataUrl) return;
-  await doLensSearch(currentPhotoDataUrl);
+// メイン: Google Lensを直接開く（Lensのカメラで魚を撮影して特定）
+function openGoogleLens(){
+  window.open('https://lens.google.com/', '_blank');
 }
 
-async function reSearchLens(id){
-  const c = myCatches.find(x => x.id === id);
-  if(!c) return;
-  await doLensSearch(c.dataUrl);
-}
-
-async function doLensSearch(dataUrl){
+// サブ: 撮った写真を共有APIでLensに送る（魚がもういない場合）
+async function shareToLens(){
+  const dataUrl = currentPhotoDataUrl;
+  if(!dataUrl){ openGoogleLens(); return; }
   try{
     const res = await fetch(dataUrl);
     const blob = await res.blob();
     const file = new File([blob], 'fish.jpg', {type:'image/jpeg'});
-
-    // 共有メニュー → 「Google レンズ」を選ぶと直接検索できる
     if(navigator.canShare && navigator.canShare({files:[file]})){
-      showToast('「Google レンズ」を選んでください');
       await navigator.share({files:[file], title:'この魚は何？'});
       return;
     }
   }catch(e){
-    // キャンセルされた場合は何もしない（identify画面に戻る）
     if(e.name === 'AbortError') return;
   }
+  openGoogleLens();
+}
 
-  // 共有API非対応の場合: Google Lensサイトを開く
-  window.open('https://lens.google.com/', '_blank');
-  showToast('Lensの🔍から画像を検索してください');
+// 詳細画面からの再検索
+function reSearchLens(id){
+  const c = myCatches.find(x => x.id === id);
+  if(!c){ openGoogleLens(); return; }
+  currentPhotoDataUrl = c.dataUrl;
+  shareToLens();
 }
 
 // ==================== Save Catch ====================
