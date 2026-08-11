@@ -251,7 +251,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
     <button class="lens-btn" onclick="openGoogleLens()">
       🔍 Google Lensで魚を特定
     </button>
-    <p class="lens-hint">Lensが開いたらカメラで魚を撮って特定できます。<br>特定できたら戻って、下に名前を入力して保存。</p>
+    <p class="lens-hint">Googleが開いたら検索バーの📷をタップ → Lensで魚を特定。<br>わかったら戻って、下に名前を入力して保存。</p>
     <button class="share-lens-btn" onclick="shareToLens()">
       📤 魚がもういない場合：この写真をLensに送る
     </button>
@@ -441,7 +441,7 @@ function closeIdentify(){
 // ==================== Google Lens ====================
 // メイン: Google Lensを直接開く（Lensのカメラで魚を撮影して特定）
 function openGoogleLens(){
-  window.open('https://lens.google.com/', '_blank');
+  window.open('https://www.google.com/', '_blank');
 }
 
 // サブ: 撮った写真を共有APIでLensに送る（魚がもういない場合）
