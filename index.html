@@ -110,15 +110,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
   padding:16px;padding-bottom:100px}
 .identify-photo{width:100%;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.15);
   margin-bottom:16px}
-.lens-btn{width:100%;padding:16px;background:var(--google);color:#fff;border:none;
-  border-radius:14px;font-size:16px;font-weight:700;cursor:pointer;margin-bottom:8px;
-  display:flex;align-items:center;justify-content:center;gap:8px;
-  box-shadow:0 4px 12px rgba(66,133,244,.3);transition:transform .1s}
-.lens-btn:active{transform:scale(.98)}
-.lens-hint{font-size:12px;color:var(--text-sub);text-align:center;margin-bottom:10px}
-.share-lens-btn{width:100%;padding:10px;background:none;color:var(--text-sub);border:1.5px solid #ccc;
-  border-radius:12px;font-size:13px;cursor:pointer;margin-bottom:20px;transition:transform .1s}
-.share-lens-btn:active{transform:scale(.98);background:#f5f5f5}
 .identify-form{background:var(--card);border-radius:16px;padding:20px;
   box-shadow:0 2px 8px rgba(0,0,0,.06)}
 .identify-form label{display:block;font-size:13px;font-weight:600;color:var(--text-sub);
@@ -195,7 +186,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
   <div class="empty-state" id="emptyState" style="display:none">
     <div class="empty-icon">🎣</div>
     <p>まだ釣果がありません</p>
-    <p class="empty-sub">カメラで魚を撮影して<br>Google Lensで特定しましょう！</p>
+    <p class="empty-sub">🔍で魚を調べて、📷で撮影して記録しよう！</p>
   </div>
 </div>
 
@@ -203,6 +194,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
 <div class="bottom-nav">
   <button class="nav-item active" onclick="scrollToTop()">
     <span class="icon">🐟</span>釣果
+  </button>
+  <button class="nav-item" onclick="openGoogleLens()">
+    <span class="icon">🔍</span>調べる
   </button>
   <button class="nav-item camera-nav" onclick="openCamera()">
     <span class="icon">📷</span>
@@ -240,21 +234,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
   </div>
 </div>
 
-<!-- Identify overlay -->
+<!-- Save overlay -->
 <div class="identify-overlay" id="identifyOverlay">
   <div class="identify-header">
     <button onclick="closeIdentify()">←</button>
-    <h2>🔍 魚を特定</h2>
+    <h2>📌 釣果を保存</h2>
   </div>
   <div class="identify-body">
     <img id="identifyPhoto" class="identify-photo" alt="撮影した魚">
-    <button class="lens-btn" onclick="openGoogleLens()">
-      🔍 Google Lensで魚を特定
-    </button>
-    <p class="lens-hint">Googleが開いたら検索バーの📷をタップ → Lensで魚を特定。<br>わかったら戻って、下に名前を入力して保存。</p>
-    <button class="share-lens-btn" onclick="shareToLens()">
-      📤 魚がもういない場合：この写真をLensに送る
-    </button>
     <div class="identify-form">
       <label>魚の名前</label>
       <input type="text" id="fishNameInput" placeholder="例: アジ、マダイ…" enterkeyhint="next">
@@ -330,7 +317,7 @@ function openDetail(id){
       <div class="detail-date">📅 ${c.date}</div>
       ${c.note ? `<div class="detail-note">📝 ${c.note}</div>` : ''}
       <div class="detail-actions">
-        <button class="btn-lens" onclick="reSearchLens('${c.id}')">🔍 再検索</button>
+        <button class="btn-lens" onclick="openGoogleLens()">🔍 調べる</button>
         <button class="btn-edit" onclick="openEditModal('${c.id}')">✏️ 編集</button>
         <button class="btn-delete" onclick="deleteCatch('${c.id}')">🗑 削除</button>
       </div>
@@ -444,31 +431,6 @@ function openGoogleLens(){
   window.open('https://www.google.com/', '_blank');
 }
 
-// サブ: 撮った写真を共有APIでLensに送る（魚がもういない場合）
-async function shareToLens(){
-  const dataUrl = currentPhotoDataUrl;
-  if(!dataUrl){ openGoogleLens(); return; }
-  try{
-    const res = await fetch(dataUrl);
-    const blob = await res.blob();
-    const file = new File([blob], 'fish.jpg', {type:'image/jpeg'});
-    if(navigator.canShare && navigator.canShare({files:[file]})){
-      await navigator.share({files:[file], title:'この魚は何？'});
-      return;
-    }
-  }catch(e){
-    if(e.name === 'AbortError') return;
-  }
-  openGoogleLens();
-}
-
-// 詳細画面からの再検索
-function reSearchLens(id){
-  const c = myCatches.find(x => x.id === id);
-  if(!c){ openGoogleLens(); return; }
-  currentPhotoDataUrl = c.dataUrl;
-  shareToLens();
-}
 
 // ==================== Save Catch ====================
 function saveCatch(){
