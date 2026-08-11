@@ -448,9 +448,26 @@ function saveCatch(){
   });
 
   saveCatchesToStorage();
+  saveToDevice(currentPhotoDataUrl, name);
   closeIdentify();
   renderCatches();
   showToast('🐟 釣果を保存しました！');
+}
+
+// 端末のライブラリに画像を保存
+async function saveToDevice(dataUrl, name){
+  try{
+    const res = await fetch(dataUrl);
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (name || 'fish') + '_' + new Date().toISOString().slice(0,10) + '.jpg';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }catch(e){}
 }
 
 // ==================== Edit ====================
