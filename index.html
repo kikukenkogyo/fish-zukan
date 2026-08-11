@@ -245,9 +245,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
   <div class="identify-body">
     <img id="identifyPhoto" class="identify-photo" alt="撮影した魚">
     <button class="lens-btn" onclick="searchGoogleLens()">
-      🔍 Google Lensで魚を調べる
+      🔍 もう一度Google Lensで検索
     </button>
-    <p class="lens-hint">タップすると共有画面が開きます。Google Lensを選んで検索してください。</p>
+    <p class="lens-hint">撮影後にGoogle Lensが自動で開きます。特定できたら下に名前を入力してください。</p>
     <div class="identify-form">
       <label>魚の名前</label>
       <input type="text" id="fishNameInput" placeholder="例: アジ、マダイ…" enterkeyhint="next">
@@ -379,7 +379,10 @@ function takePhoto(){
   canvas.getContext('2d').drawImage(video, 0, 0);
   const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
   closeCamera();
-  resizeImage(dataUrl).then(resized => openIdentify(resized));
+  resizeImage(dataUrl).then(resized => {
+    openIdentify(resized);
+    doLensSearch(resized);
+  });
 }
 
 // ==================== Gallery ====================
@@ -392,7 +395,10 @@ document.getElementById('galleryInput').addEventListener('change', e => {
   if(!file) return;
   const reader = new FileReader();
   reader.onload = ev => {
-    resizeImage(ev.target.result).then(resized => openIdentify(resized));
+    resizeImage(ev.target.result).then(resized => {
+      openIdentify(resized);
+      doLensSearch(resized);
+    });
   };
   reader.readAsDataURL(file);
   e.target.value = '';
