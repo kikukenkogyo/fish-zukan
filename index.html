@@ -246,9 +246,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans",sans-serif;
   <div class="identify-body">
     <img id="identifyPhoto" class="identify-photo" alt="撮影した魚">
     <button class="lens-btn" onclick="searchGoogleLens()">
-      🔍 Google Lensで再検索
+      🔍 Google Lensで検索
     </button>
-    <p class="lens-hint">撮影した画像が端末に保存され、Google Lensが開きます。<br>Lensの🔍から保存した画像を選んで検索してください。<br>戻ってきたら下に魚の名前を入力して保存。</p>
+    <p class="lens-hint">メニューから「Google レンズ」を選ぶと魚を特定できます。<br>特定できたら戻って、下に名前を入力して保存。</p>
     <div class="identify-form">
       <label>魚の名前</label>
       <input type="text" id="fishNameInput" placeholder="例: アジ、マダイ…" enterkeyhint="next">
@@ -452,25 +452,24 @@ async function reSearchLens(id){
 
 async function doLensSearch(dataUrl){
   try{
-    // 画像を端末に保存
     const res = await fetch(dataUrl);
     const blob = await res.blob();
-    const blobUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = blobUrl;
-    a.download = 'fish_' + Date.now() + '.jpg';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
-  }catch(e){}
+    const file = new File([blob], 'fish.jpg', {type:'image/jpeg'});
 
-  // Google Lensを開く
-  setTimeout(() => {
-    window.open('https://lens.google.com/', '_blank');
-  }, 600);
+    // 共有メニュー → 「Google レンズ」を選ぶと直接検索できる
+    if(navigator.canShare && navigator.canShare({files:[file]})){
+      showToast('「Google レンズ」を選んでください');
+      await navigator.share({files:[file], title:'この魚は何？'});
+      return;
+    }
+  }catch(e){
+    // キャンセルされた場合は何もしない（identify画面に戻る）
+    if(e.name === 'AbortError') return;
+  }
 
-  showToast('📷 画像を保存しました');
+  // 共有API非対応の場合: Google Lensサイトを開く
+  window.open('https://lens.google.com/', '_blank');
+  showToast('Lensの🔍から画像を検索してください');
 }
 
 // ==================== Save Catch ====================
